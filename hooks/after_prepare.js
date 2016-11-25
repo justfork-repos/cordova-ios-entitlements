@@ -3,19 +3,6 @@ var fs = require('fs');
 var xcodeHelpers = require('./lib/xcode-helpers');
 var preferencesParser = require('./lib/preferences-parser');
 
-var xentitlementsContent =
-`<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-<plist version="1.0">
-<dict>
-	<key>com.apple.developer.in-app-payments</key>
-	<array>
-		<string>merchant.com.x.y</string>
-	</array>
-</dict>
-</plist>`;
-
-
 module.exports = function(ctx) {
   glob = ctx.requireCordovaModule('glob');
   xcode = ctx.requireCordovaModule('xcode');
