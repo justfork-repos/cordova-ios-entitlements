@@ -1,8 +1,9 @@
 var path = require('path');
 var fs = require('fs');
 var xcodeHelpers = require('./lib/xcode-helpers');
+var preferencesParser = require('./lib/preferences-parser');
 
-var entitlementsContent =
+var xentitlementsContent =
 `<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
@@ -19,11 +20,19 @@ module.exports = function(ctx) {
   glob = ctx.requireCordovaModule('glob');
   xcode = ctx.requireCordovaModule('xcode');
   var projectRoot = ctx.opts.projectRoot;
-  var cordovaIosProjectFolder = path.join(projectRoot, 'platforms', 'ios');
-  var pbxprojFile = glob.sync(path.join(cordovaIosProjectFolder, '*.xcodeproj', 'project.pbxproj'))[0];
-  var xcodeProjectFolder = path.dirname(pbxprojFile);
-  var relativeXcodeProjectFolder = path.basename(xcodeProjectFolder);
+  var configXml = path.join(projectRoot, 'config.xml');
+  var preferences = preferencesParser.parseConfigXml(configXml);
+  var entitlementsSrcFile = preferences['cordova-ios-entitlements-file'];
+  if (!entitlementsSrcFile) {
+    console.error('cordova-ios-entitlements: preference "cordova-ios-entitlements-file" must be set');
+    return;
+  }
+  var entitlementsContent = fs.readFileSync(path.join(projectRoot, entitlementsSrcFile),'utf8');
 
+  var cordovaIosProjectPath = path.join(projectRoot, 'platforms', 'ios');
+  var pbxprojFile = glob.sync(path.join(cordovaIosProjectPath, '*.xcodeproj', 'project.pbxproj'))[0];
+  var xcodeProjectFolderPath = path.dirname(pbxprojFile);
+  var xcodeProjectFolderName = path.basename(xcodeProjectFolderPath);
 
   if (!pbxprojFile) {
     throw new Error('cordova-ios-entitlements: could not find project.pbxproj file');
@@ -32,12 +41,14 @@ module.exports = function(ctx) {
   var xcodeProject = xcode.project(pbxprojFile);
   xcodeProject.parseSync();
 
-  var entitlementsFileName = 'Entitlements.entitlements';
-  var entitlementsFilePath = path.join(xcodeProjectFolder, entitlementsFileName);
-  var relativeEntitlementsFilePath = path.join(relativeXcodeProjectFolder, entitlementsFileName);
+  var entitlementsDestinationFileName = 'Entitlements.entitlements';
+  var entitlementsDestinationFilePath = path.join(xcodeProjectFolderPath, entitlementsDestinationFileName);
+  var entitlementsXcodeFilePath = path.join(xcodeProjectFolderName, entitlementsDestinationFileName);
   
-  fs.writeFileSync(entitlementsFilePath, entitlementsContent);
-  xcodeHelpers.addEntitlementsFileToProject(xcodeProject, relativeEntitlementsFilePath);
-  xcodeHelpers.useCodeSignEntitlementsForConfiguration(xcodeProject, relativeEntitlementsFilePath);
+  fs.writeFileSync(entitlementsDestinationFilePath, entitlementsContent);
+
+  xcodeHelpers.addEntitlementsFileToProject(xcodeProject, entitlementsXcodeFilePath);
+  xcodeHelpers.useCodeSignEntitlementsForConfiguration(xcodeProject, entitlementsXcodeFilePath);
+
   fs.writeFileSync(pbxprojFile, xcodeProject.writeSync());
 };
