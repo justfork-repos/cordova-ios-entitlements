@@ -1,0 +1,23 @@
+{
+  "name": "cordova-ios-entitlements",
+  "version": "1.0.0",
+  "description": "Entitlements plugin for Cordova",
+  "main": "index.js",
+  "dependencies": {
+    "elementtree": "^0.1.6"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dannymarsland/cordova-ios-entitlements.git"
+  },
+  "author": "Danny Marsland",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/dannymarsland/cordova-ios-entitlements/issues"
+  },
+  "homepage": "https://github.com/dannymarsland/cordova-ios-entitlements#readme"
+}
