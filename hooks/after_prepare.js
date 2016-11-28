@@ -4,6 +4,11 @@ var xcodeHelpers = require('./lib/xcode-helpers');
 var preferencesParser = require('./lib/preferences-parser');
 
 module.exports = function(ctx) {
+
+  if (ctx.opts.platforms.indexOf('ios') === -1) {
+    return;
+  }
+
   glob = ctx.requireCordovaModule('glob');
   xcode = ctx.requireCordovaModule('xcode');
   var projectRoot = ctx.opts.projectRoot;
